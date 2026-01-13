@@ -304,6 +304,19 @@
       background: var(--warning);
     }
     
+    .btn-disabled {
+      background: #666 !important;
+      color: #aaa !important;
+      cursor: not-allowed !important;
+      opacity: 0.7 !important;
+      box-shadow: none !important;
+    }
+    
+    .btn-disabled:hover {
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    
     .btn-sm {
       padding: 8px 12px;
       font-size: 0.8rem;
@@ -651,6 +664,17 @@
     
     .room-closed {
       background-color: var(--accent);
+      position: relative;
+      padding-left: 24px;
+    }
+    
+    .room-closed::before {
+      content: "🔒";
+      position: absolute;
+      left: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.7rem;
     }
     
     .room-info {
@@ -1988,18 +2012,23 @@
   </footer>
 
   <script>
-    // بيانات التطبيق
+    // ✅ إعدادات Supabase - استخدام REST API مباشرة
+    const SUPABASE_URL = 'https://lrjbpvkatwxmvqcnpior.supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_t9oNqRZpbZfitWE2qdIjsw_u6XLfPmK';
+    
+    // ✅ بيانات التطبيق
     const LEADER_ACCESS_CODE = "20440";
     
     const state = {
       isAuthenticated: false,
-      activities: JSON.parse(localStorage.getItem('activities')) || [],
+      activities: [],
       currentActivityLink: null,
       selectedActivityType: "",
-      selectedFilterType: "all"
+      selectedFilterType: "all",
+      isLoading: false
     };
 
-    // عناصر DOM
+    // ✅ عناصر DOM
     const mainScreen = document.getElementById('mainScreen');
     const leaderSection = document.getElementById('leaderSection');
     const partnerSection = document.getElementById('partnerSection');
@@ -2018,7 +2047,7 @@
     const meetWindow = document.getElementById('meetWindow');
     const meetFrame = document.getElementById('meetFrame');
     
-    // عناصر نافذة تفاصيل النشاط
+    // ✅ عناصر نافذة تفاصيل النشاط
     const activityDetailModal = document.getElementById('activityDetailModal');
     const detailActivityTitle = document.getElementById('detailActivityTitle');
     const detailActivityDescription = document.getElementById('detailActivityDescription');
@@ -2030,19 +2059,19 @@
     const detailActivityStatus = document.getElementById('detailActivityStatus');
     const detailJoinButton = document.getElementById('detailJoinButton');
     
-    // عناصر نافذة اختيار نوع النشاط
+    // ✅ عناصر نافذة اختيار نوع النشاط
     const activityTypeModal = document.getElementById('activityTypeModal');
     const activityTypesGrid = document.getElementById('activityTypesGrid');
     const selectedActivityTypeText = document.getElementById('selectedActivityTypeText');
     const activityTypeInput = document.getElementById('activityType');
     
-    // عناصر نافذة تصفية نوع النشاط
+    // ✅ عناصر نافذة تصفية نوع النشاط
     const filterActivityTypeModal = document.getElementById('filterActivityTypeModal');
     const filterActivityTypesGrid = document.getElementById('filterActivityTypesGrid');
     const selectedFilterTypeText = document.getElementById('selectedFilterTypeText');
     const filterSelectInput = document.getElementById('filterSelect');
 
-    // أنواع الأنشطة
+    // ✅ أنواع الأنشطة
     const activityTypes = [
       {
         id: "project",
@@ -2074,23 +2103,154 @@
       }
     ];
 
-    // تحميل البيانات من localStorage
-    function loadData() {
-      const savedActivities = localStorage.getItem('activities');
-      
-      if (savedActivities) {
-        state.activities = JSON.parse(savedActivities);
+    // ✅ 1. دالة للتواصل مع Supabase عبر REST API
+    async function supabaseFetch(endpoint, method = 'GET', data = null) {
+      try {
+        const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
+        
+        const options = {
+          method,
+          headers: {
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=representation'
+          }
+        };
+        
+        if (data) {
+          options.body = JSON.stringify(data);
+        }
+        
+        const response = await fetch(url, options);
+        
+        if (!response.ok) {
+          throw new Error(`خطأ في الخادم: ${response.status}`);
+        }
+        
+        return await response.json();
+      } catch (error) {
+        console.error('خطأ في supabaseFetch:', error);
+        showNotification('حدث خطأ في الاتصال بقاعدة البيانات', 'error');
+        throw error;
       }
-      
-      updateStats();
     }
 
-    // حفظ البيانات إلى localStorage
-    function saveData() {
-      localStorage.setItem('activities', JSON.stringify(state.activities));
+    // ✅ 2. تحميل البيانات من Supabase
+    async function loadData() {
+      try {
+        state.isLoading = true;
+        showNotification('جاري تحميل البيانات...', 'success');
+        
+        const data = await supabaseFetch('activities?select=*&order=created_at.desc');
+        
+        if (data) {
+          state.activities = data.map(item => ({
+            id: item.id.toString(),
+            type: item.type,
+            roomType: item.room_type,
+            title: item.title,
+            description: item.description,
+            startTime: item.start_time,
+            endTime: item.end_time,
+            link: item.link,
+            customMessage: item.custom_message,
+            date: new Date(item.created_at).toLocaleDateString('ar-AR'),
+            created_at: item.created_at
+          }));
+          
+          showNotification('تم تحميل البيانات بنجاح', 'success');
+        }
+        
+        updateStats();
+      } catch (error) {
+        console.error('خطأ في loadData:', error);
+        // محاولة استخدام localStorage كنسخة احتياطية
+        const localData = localStorage.getItem('activities_backup');
+        if (localData) {
+          state.activities = JSON.parse(localData);
+          showNotification('تم تحميل البيانات من النسخة الاحتياطية', 'warning');
+        }
+      } finally {
+        state.isLoading = false;
+      }
     }
 
-    // تحديث الإحصائيات
+    // ✅ 3. إضافة نشاط جديد إلى Supabase
+    async function addActivityToSupabase(activity) {
+      try {
+        const data = await supabaseFetch('activities', 'POST', {
+          type: activity.type,
+          room_type: activity.roomType,
+          title: activity.title,
+          description: activity.description,
+          start_time: activity.startTime,
+          end_time: activity.endTime,
+          link: activity.link,
+          custom_message: activity.customMessage
+        });
+        
+        if (data && data.length > 0) {
+          // حفظ نسخة احتياطية محلية
+          saveLocalBackup(data[0]);
+          
+          showNotification('تم إضافة النشاط بنجاح', 'success');
+          return data[0];
+        }
+        
+        return null;
+      } catch (error) {
+        console.error('خطأ في addActivityToSupabase:', error);
+        showNotification('حدث خطأ في إضافة النشاط', 'error');
+        return null;
+      }
+    }
+
+    // ✅ 4. تحديث نشاط في Supabase
+    async function updateActivityInSupabase(activityId, updates) {
+      try {
+        const data = await supabaseFetch(`activities?id=eq.${activityId}`, 'PATCH', {
+          room_type: updates.roomType
+        });
+        
+        showNotification('تم تحديث النشاط بنجاح', 'success');
+        return true;
+      } catch (error) {
+        console.error('خطأ في updateActivityInSupabase:', error);
+        showNotification('حدث خطأ في تحديث النشاط', 'error');
+        return false;
+      }
+    }
+
+    // ✅ 5. حذف نشاط من Supabase
+    async function deleteActivityFromSupabase(activityId) {
+      try {
+        await supabaseFetch(`activities?id=eq.${activityId}`, 'DELETE');
+        
+        showNotification('تم حذف النشاط بنجاح', 'success');
+        return true;
+      } catch (error) {
+        console.error('خطأ في deleteActivityFromSupabase:', error);
+        showNotification('حدث خطأ في حذف النشاط', 'error');
+        return false;
+      }
+    }
+
+    // ✅ 6. حفظ نسخة احتياطية محلية
+    function saveLocalBackup(activity) {
+      try {
+        let backups = JSON.parse(localStorage.getItem('activities_backup') || '[]');
+        backups.push({
+          ...activity,
+          local_save: new Date().toISOString()
+        });
+        localStorage.setItem('activities_backup', JSON.stringify(backups.slice(-50))); // حفظ آخر 50 نشاط
+      } catch (error) {
+        console.error('خطأ في حفظ النسخة الاحتياطية:', error);
+      }
+    }
+
+    // ✅ تحديث الإحصائيات
     function updateStats() {
       const projects = state.activities.filter(a => a.type === 'project').length;
       const meetings = state.activities.filter(a => a.type === 'meeting').length;
@@ -2105,7 +2265,7 @@
       totalActivitiesElement.textContent = total;
     }
 
-    // عرض تسجيل الدخول للقائد
+    // ✅ عرض تسجيل الدخول للقائد
     function showLeaderLogin() {
       mainScreen.classList.add('hidden');
       partnerSection.classList.add('hidden');
@@ -2113,12 +2273,11 @@
       authForm.classList.remove('hidden');
       leaderDashboard.classList.add('hidden');
       
-      // مسح حقل الكود
       document.getElementById('accessCode').value = '';
       codeStatus.classList.add('hidden');
     }
 
-    // عرض قسم الشركاء
+    // ✅ عرض قسم الشركاء
     function showPartnerSection() {
       mainScreen.classList.add('hidden');
       leaderSection.classList.add('hidden');
@@ -2126,14 +2285,14 @@
       renderActivitiesForPartners();
     }
 
-    // العودة إلى الشاشة الرئيسية
+    // ✅ العودة إلى الشاشة الرئيسية
     function showMain() {
       mainScreen.classList.remove('hidden');
       leaderSection.classList.add('hidden');
       partnerSection.classList.add('hidden');
     }
 
-    // التحقق من رمز الدخول
+    // ✅ التحقق من رمز الدخول
     function checkAccessCode() {
       const enteredCode = document.getElementById('accessCode').value.trim();
       
@@ -2150,9 +2309,8 @@
       }
     }
 
-    // عرض نافذة اختيار نوع النشاط
+    // ✅ عرض نافذة اختيار نوع النشاط
     function showActivityTypeModal() {
-      // تعبئة شبكة أنواع الأنشطة
       activityTypesGrid.innerHTML = '';
       
       activityTypes.forEach(type => {
@@ -2175,25 +2333,22 @@
       activityTypeModal.classList.remove('hidden');
     }
 
-    // إغلاق نافذة اختيار نوع النشاط
+    // ✅ إغلاق نافذة اختيار نوع النشاط
     function closeActivityTypeModal() {
       activityTypeModal.classList.add('hidden');
     }
 
-    // اختيار نوع النشاط
+    // ✅ اختيار نوع النشاط
     function selectActivityType(typeId) {
-      // إزالة التحديد من جميع العناصر
       document.querySelectorAll('.activity-type-item').forEach(item => {
         item.classList.remove('selected');
       });
       
-      // إضافة التحديد للعنصر المختار
       document.querySelector(`.activity-type-item[data-type="${typeId}"]`).classList.add('selected');
-      
       state.selectedActivityType = typeId;
     }
 
-    // تأكيد اختيار نوع النشاط
+    // ✅ تأكيد اختيار نوع النشاط
     function confirmActivityType() {
       if (state.selectedActivityType) {
         const selectedType = activityTypes.find(type => type.id === state.selectedActivityType);
@@ -2205,12 +2360,11 @@
       }
     }
 
-    // عرض نافذة تصفية نوع النشاط
+    // ✅ عرض نافذة تصفية نوع النشاط
     function showFilterActivityTypeModal() {
-      // تعبئة شبكة أنواع الأنشطة للتصفية
       filterActivityTypesGrid.innerHTML = '';
       
-      // إضافة خيار "جميع الأنشطة"
+      // خيار "جميع الأنشطة"
       const allElement = document.createElement('div');
       allElement.className = `activity-type-item ${state.selectedFilterType === 'all' ? 'selected' : ''}`;
       allElement.setAttribute('data-type', 'all');
@@ -2226,7 +2380,7 @@
       
       filterActivityTypesGrid.appendChild(allElement);
       
-      // إضافة أنواع الأنشطة
+      // أنواع الأنشطة
       activityTypes.forEach(type => {
         const typeElement = document.createElement('div');
         typeElement.className = `activity-type-item ${state.selectedFilterType === type.id ? 'selected' : ''}`;
@@ -2247,25 +2401,22 @@
       filterActivityTypeModal.classList.remove('hidden');
     }
 
-    // إغلاق نافذة تصفية نوع النشاط
+    // ✅ إغلاق نافذة تصفية نوع النشاط
     function closeFilterActivityTypeModal() {
       filterActivityTypeModal.classList.add('hidden');
     }
 
-    // اختيار نوع النشاط للتصفية
+    // ✅ اختيار نوع النشاط للتصفية
     function selectFilterActivityType(typeId) {
-      // إزالة التحديد من جميع العناصر
       document.querySelectorAll('#filterActivityTypesGrid .activity-type-item').forEach(item => {
         item.classList.remove('selected');
       });
       
-      // إضافة التحديد للعنصر المختار
       document.querySelector(`#filterActivityTypesGrid .activity-type-item[data-type="${typeId}"]`).classList.add('selected');
-      
       state.selectedFilterType = typeId;
     }
 
-    // تأكيد اختيار نوع النشاط للتصفية
+    // ✅ تأكيد اختيار نوع النشاط للتصفية
     function confirmFilterActivityType() {
       if (state.selectedFilterType) {
         if (state.selectedFilterType === 'all') {
@@ -2281,34 +2432,50 @@
       }
     }
 
-    // إضافة نشاط جديد
-    function addActivity() {
+    // ✅ الحصول على الوقت الحالي بدون ثواني فقط
+    function getCurrentTime() {
+      const now = new Date();
+      // فقط إزالة الثواني والأجزاء من الثواني
+      now.setSeconds(0, 0);
+      return now;
+    }
+
+    // ✅ إضافة نشاط جديد - النسخة المعدلة
+    async function addActivity() {
       const type = activityTypeInput.value;
       const roomType = document.getElementById('roomType').value;
       const title = document.getElementById('activityTitle').value.trim();
       const description = document.getElementById('activityDescription').value.trim();
-      const startTime = document.getElementById('startTime').value;
-      const endTime = document.getElementById('endTime').value;
+      const startTimeInput = document.getElementById('startTime').value;
+      const endTimeInput = document.getElementById('endTime').value;
       const link = document.getElementById('activityLink').value.trim();
       const customMessage = document.getElementById('activityCustomMessage').value.trim();
       
-      if (!title || !startTime || !link || !type) {
+      if (!title || !startTimeInput || !link || !type) {
         showNotification('يرجى ملء الحقول الإلزامية: العنوان، وقت البدء، الرابط، ونوع النشاط', 'error');
         return;
       }
       
-      // التحقق من أن وقت البدء ليس في الماضي
-      const now = new Date();
-      const startDateTime = new Date(startTime);
+      // تحويل وقت البدء إلى كائن Date
+      const startDateTime = new Date(startTimeInput);
       
-      if (startDateTime < now) {
+      // فقط إزالة الثواني، بدون تغيير الدقائق أو الساعات
+      startDateTime.setSeconds(0, 0);
+      
+      // التحقق من أن وقت البدء ليس في الماضي
+      const currentTime = getCurrentTime();
+      
+      if (startDateTime < currentTime) {
         showNotification('لا يمكن إضافة نشاط بوقت بدء في الماضي', 'error');
         return;
       }
       
-      // التحقق من أن وقت الانتهاء يكون بعد وقت البدء
-      if (endTime) {
-        const endDateTime = new Date(endTime);
+      // معالجة وقت الانتهاء إذا كان موجوداً
+      let endDateTime = null;
+      if (endTimeInput) {
+        endDateTime = new Date(endTimeInput);
+        endDateTime.setSeconds(0, 0);
+        
         if (endDateTime <= startDateTime) {
           showNotification('وقت الانتهاء يجب أن يكون بعد وقت البدء', 'error');
           return;
@@ -2322,31 +2489,44 @@
         return;
       }
       
+      // استخدام التواريخ المحفوظة (بدون ثواني)
       const activity = {
-        id: Date.now().toString(),
         type: type,
         roomType: roomType,
         title: title,
         description: description,
-        startTime: startTime,
-        endTime: endTime || null,
+        startTime: startDateTime.toISOString(), // حفظ كتنسيق ISO كامل
+        endTime: endDateTime ? endDateTime.toISOString() : null,
         link: formattedLink,
-        customMessage: customMessage,
-        date: new Date().toLocaleDateString('ar-AR')
+        customMessage: customMessage
       };
       
-      state.activities.push(activity);
-      saveData();
-      renderActivitiesForLeader();
+      // إضافة النشاط
+      const savedActivity = await addActivityToSupabase(activity);
       
-      // مسح الحقول
-      clearForm();
-      
-      showNotification('تم إضافة النشاط بنجاح');
-      updateStats();
+      if (savedActivity) {
+        const localActivity = {
+          id: savedActivity.id.toString(),
+          type: savedActivity.type,
+          roomType: savedActivity.room_type,
+          title: savedActivity.title,
+          description: savedActivity.description,
+          startTime: savedActivity.start_time,
+          endTime: savedActivity.end_time,
+          link: savedActivity.link,
+          customMessage: savedActivity.custom_message,
+          date: new Date(savedActivity.created_at).toLocaleDateString('ar-AR'),
+          created_at: savedActivity.created_at
+        };
+        
+        state.activities.unshift(localActivity);
+        renderActivitiesForLeader();
+        clearForm();
+        updateStats();
+      }
     }
 
-    // مسح الحقول
+    // ✅ مسح الحقول
     function clearForm() {
       document.getElementById('activityTitle').value = '';
       document.getElementById('activityDescription').value = '';
@@ -2358,7 +2538,7 @@
       state.selectedActivityType = '';
     }
 
-    // عرض الأنشطة للقائد
+    // ✅ عرض الأنشطة للقائد
     function renderActivitiesForLeader() {
       activitiesList.innerHTML = '';
       
@@ -2373,15 +2553,15 @@
         return;
       }
       
-      // ترتيب الأنشطة من الأحدث للأقدم
-      const sortedActivities = [...state.activities].sort((a, b) => b.id - a.id);
+      const sortedActivities = [...state.activities].sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
       
       sortedActivities.forEach(activity => {
         const activityType = activityTypes.find(type => type.id === activity.type);
         const activityElement = document.createElement('div');
         activityElement.className = 'content-item';
         
-        // تقليل عرض الرابط في حالة كونه طويلاً
         const displayLink = activity.link.length > 40 
           ? activity.link.substring(0, 40) + '...' 
           : activity.link;
@@ -2400,7 +2580,7 @@
             ${activity.endTime ? `<span>الانتهاء: ${formatDateTime(activity.endTime)}</span>` : ''}
           </div>
           <div class="content-actions">
-            <button class="btn" onclick="joinActivity('${activity.link}')">الدخول للنشاط</button>
+            <button class="btn" onclick="joinActivity('${activity.link}', '${activity.roomType}')">الدخول للنشاط</button>
             <button class="btn btn-warning" onclick="toggleRoomType('${activity.id}')">
               ${activity.roomType === 'open' ? 'تحويل إلى مغلقة' : 'تحويل إلى مفتوحة'}
             </button>
@@ -2420,7 +2600,7 @@
       });
     }
 
-    // عرض الأنشطة للشركاء
+    // ✅ عرض الأنشطة للشركاء
     function renderActivitiesForPartners() {
       activitiesContainer.innerHTML = '';
       
@@ -2437,7 +2617,6 @@
       
       let filteredActivities = state.activities;
       
-      // تصفية حسب البحث
       const searchText = document.getElementById('searchInput').value.toLowerCase();
       if (searchText) {
         filteredActivities = filteredActivities.filter(activity => 
@@ -2446,7 +2625,6 @@
         );
       }
       
-      // تصفية حسب النوع
       const filterValue = state.selectedFilterType;
       if (filterValue !== 'all') {
         filteredActivities = filteredActivities.filter(activity => activity.type === filterValue);
@@ -2462,13 +2640,41 @@
         return;
       }
       
-      // ترتيب الأنشطة من الأحدث للأقدم
-      const sortedActivities = [...filteredActivities].sort((a, b) => b.id - a.id);
+      const sortedActivities = [...filteredActivities].sort((a, b) => {
+        return new Date(b.created_at) - new Date(a.created_at);
+      });
       
       sortedActivities.forEach(activity => {
         const activityType = activityTypes.find(type => type.id === activity.type);
         const activityElement = document.createElement('div');
         activityElement.className = 'activity-card';
+        
+        // التحقق من حالة النشاط بناءً على الوقت الحالي
+        const now = getCurrentTime();
+        const startTime = new Date(activity.startTime);
+        const endTime = activity.endTime ? new Date(activity.endTime) : null;
+        
+        // ضبط الثواني والأجزاء من الثواني إلى صفر
+        startTime.setSeconds(0, 0);
+        if (endTime) endTime.setSeconds(0, 0);
+        
+        let status = '';
+        let statusColor = '';
+        
+        if (now < startTime) {
+          status = 'قادم';
+          statusColor = 'var(--secondary)';
+        } else if (now >= startTime && (endTime ? now <= endTime : true)) {
+          status = 'جاري الآن';
+          statusColor = 'var(--success)';
+        } else {
+          status = 'منتهي';
+          statusColor = 'var(--accent)';
+        }
+        
+        // تحديد ما إذا كان يمكن الانضمام للنشاط
+        const canJoin = activity.roomType === 'open';
+        
         activityElement.innerHTML = `
           <div class="activity-header">
             <div class="activity-type" style="background: ${activityType ? activityType.color : '#6a0dad'}">${getTypeText(activity.type)}</div>
@@ -2481,17 +2687,23 @@
               <span>البدء: ${formatDateTime(activity.startTime)}</span>
               ${activity.endTime ? `<span>الانتهاء: ${formatDateTime(activity.endTime)}</span>` : ''}
             </div>
+            <div style="margin: 8px 0; padding: 5px 10px; background: ${statusColor}; color: white; border-radius: 6px; display: inline-block; font-size: 0.8rem;">
+              ${status}
+            </div>
             <div class="activity-actions">
               <button class="btn btn-outline" onclick="showActivityDetail('${activity.id}')">
                 <i class="fas fa-info-circle"></i> التفاصيل
               </button>
-              <button class="btn" onclick="joinActivity('${activity.link}')">
-                <i class="fas fa-video"></i> انضم الآن
+              <button class="${canJoin ? 'btn' : 'btn btn-disabled'}" 
+                      onclick="${canJoin ? `joinActivity('${activity.link}', '${activity.roomType}')` : ''}" 
+                      ${!canJoin ? 'title="الغرفة مغلقة، لا يمكن الانضمام حالياً"' : ''}>
+                <i class="fas fa-video"></i> ${canJoin ? 'انضم الآن' : 'مغلق'}
               </button>
               <button class="btn btn-accent" onclick="showCopyModalForPartner('${activity.id}')">
                 <i class="fas fa-copy"></i> نسخ
               </button>
             </div>
+            ${!canJoin ? '<div style="margin-top: 10px; color: var(--accent); font-size: 0.8rem;"><i class="fas fa-lock"></i> هذه الغرفة مغلقة حالياً</div>' : ''}
           </div>
         `;
         
@@ -2499,12 +2711,11 @@
       });
     }
 
-    // عرض نافذة نسخ للشريك
+    // ✅ عرض نافذة نسخ للشريك
     function showCopyModalForPartner(activityId) {
       const activity = state.activities.find(a => a.id === activityId);
       if (!activity) return;
       
-      // إنشاء النافذة المنبثقة
       const modal = document.createElement('div');
       modal.className = 'code-modal';
       modal.innerHTML = `
@@ -2541,12 +2752,11 @@
       document.body.appendChild(modal);
     }
 
-    // عرض نافذة نسخ للقائد
+    // ✅ عرض نافذة نسخ للقائد
     function showCopyModal(activityId) {
       const activity = state.activities.find(a => a.id === activityId);
       if (!activity) return;
       
-      // إنشاء النافذة المنبثقة
       const modal = document.createElement('div');
       modal.className = 'code-modal';
       modal.innerHTML = `
@@ -2583,49 +2793,42 @@
       document.body.appendChild(modal);
     }
 
-    // نسخ الرسالة
+    // ✅ نسخ الرسالة
     function copyMessage(activityId) {
       const activity = state.activities.find(a => a.id === activityId);
       if (!activity) return;
       
       let textToCopy = activity.customMessage || '';
       
-      // التحقق من دعم navigator.clipboard
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(textToCopy).then(() => {
           showNotification('تم نسخ الرسالة بنجاح', 'success');
         }).catch(err => {
-          // إذا فشل نسخ الرابط باستخدام clipboard API، نستخدم الطريقة القديمة
           fallbackCopyTextToClipboard(textToCopy, 'الرسالة');
         });
       } else {
-        // استخدام الطريقة القديمة للنسخ
         fallbackCopyTextToClipboard(textToCopy, 'الرسالة');
       }
     }
 
-    // نسخ الرابط فقط
+    // ✅ نسخ الرابط فقط
     function copyLink(link, title = "") {
-      // التحقق من دعم navigator.clipboard
       if (navigator.clipboard && window.isSecureContext) {
         navigator.clipboard.writeText(link).then(() => {
           showNotification(`تم نسخ رابط النشاط ${title ? `"${title}"` : ''}`, 'success');
         }).catch(err => {
-          // إذا فشل نسخ الرابط باستخدام clipboard API، نستخدم الطريقة القديمة
           fallbackCopyTextToClipboard(link, title);
         });
       } else {
-        // استخدام الطريقة القديمة للنسخ
         fallbackCopyTextToClipboard(link, title);
       }
     }
 
-    // الطريقة البديلة للنسخ
+    // ✅ الطريقة البديلة للنسخ
     function fallbackCopyTextToClipboard(text, title = "") {
       const textArea = document.createElement("textarea");
       textArea.value = text;
       
-      // تجنب التمرير إلى الأسفل
       textArea.style.top = "0";
       textArea.style.left = "0";
       textArea.style.position = "fixed";
@@ -2648,11 +2851,10 @@
       document.body.removeChild(textArea);
     }
 
-    // عرض تفاصيل النشاط في نافذة منبثقة
+    // ✅ عرض تفاصيل النشاط
     function showActivityDetail(activityId) {
       const activity = state.activities.find(a => a.id === activityId);
       if (activity) {
-        // تعبئة البيانات في النافذة المنبثقة
         detailActivityTitle.textContent = activity.title;
         detailActivityDescription.textContent = activity.description || 'لا يوجد وصف مفصل لهذا النشاط';
         detailActivityType.textContent = getTypeText(activity.type);
@@ -2661,14 +2863,18 @@
         detailEndTime.textContent = activity.endTime ? formatTime(activity.endTime) : 'غير محدد';
         detailActivityDate.textContent = formatDate(activity.startTime);
         
-        // تحديد حالة النشاط بناءً على الوقت الحالي
-        const now = new Date();
+        const now = getCurrentTime();
         const startTime = new Date(activity.startTime);
+        const endTime = activity.endTime ? new Date(activity.endTime) : null;
+        
+        // ضبط الثواني والأجزاء من الثواني إلى صفر
+        startTime.setSeconds(0, 0);
+        if (endTime) endTime.setSeconds(0, 0);
         
         if (now < startTime) {
           detailActivityStatus.textContent = 'قادم';
           detailActivityStatus.style.color = 'var(--secondary)';
-        } else if (now >= startTime && (activity.endTime ? now <= new Date(activity.endTime) : true)) {
+        } else if (now >= startTime && (endTime ? now <= endTime : true)) {
           detailActivityStatus.textContent = 'جاري الآن';
           detailActivityStatus.style.color = 'var(--success)';
         } else {
@@ -2676,104 +2882,115 @@
           detailActivityStatus.style.color = 'var(--accent)';
         }
         
-        // حفظ رابط النشاط للاستخدام لاحقاً
         state.currentActivityLink = activity.link;
         
-        // إظهار النافذة المنبثقة
+        // تحديث زر الانضمام بناءً على حالة الغرفة
+        const canJoin = activity.roomType === 'open';
+        if (canJoin) {
+          detailJoinButton.className = 'btn';
+          detailJoinButton.onclick = () => joinActivityFromDetail();
+          detailJoinButton.innerHTML = '<i class="fas fa-video"></i> انضم إلى النشاط';
+          detailJoinButton.disabled = false;
+        } else {
+          detailJoinButton.className = 'btn btn-disabled';
+          detailJoinButton.onclick = () => showNotification('الغرفة مغلقة، لا يمكن الانضمام حالياً', 'error');
+          detailJoinButton.innerHTML = '<i class="fas fa-lock"></i> الغرفة مغلقة';
+          detailJoinButton.disabled = true;
+        }
+        
         activityDetailModal.classList.remove('hidden');
       }
     }
 
-    // إغلاق نافذة تفاصيل النشاط
+    // ✅ إغلاق نافذة تفاصيل النشاط
     function closeActivityDetail() {
       activityDetailModal.classList.add('hidden');
       state.currentActivityLink = null;
     }
 
-    // الانضمام إلى النشاط من نافذة التفاصيل
+    // ✅ الانضمام إلى النشاط من نافذة التفاصيل
     function joinActivityFromDetail() {
       if (state.currentActivityLink) {
-        joinActivity(state.currentActivityLink);
+        joinActivity(state.currentActivityLink, 'open');
         closeActivityDetail();
       }
     }
 
-    // تغيير نوع الغرفة
-    function toggleRoomType(activityId) {
+    // ✅ تغيير نوع الغرفة
+    async function toggleRoomType(activityId) {
       const activity = state.activities.find(a => a.id === activityId);
       if (activity) {
-        activity.roomType = activity.roomType === 'open' ? 'closed' : 'open';
-        saveData();
-        renderActivitiesForLeader();
+        const newRoomType = activity.roomType === 'open' ? 'closed' : 'open';
         
-        const newRoomType = getRoomTypeText(activity.roomType);
-        showNotification(`تم تغيير نوع الغرفة إلى ${newRoomType}`);
+        const success = await updateActivityInSupabase(activityId, { roomType: newRoomType });
+        
+        if (success) {
+          activity.roomType = newRoomType;
+          renderActivitiesForLeader();
+          const roomTypeText = getRoomTypeText(newRoomType);
+          showNotification(`تم تغيير نوع الغرفة إلى ${roomTypeText}`);
+        }
       }
     }
 
-    // حذف نشاط
-    function deleteActivity(id) {
+    // ✅ حذف نشاط
+    async function deleteActivity(id) {
       if (confirm('هل أنت متأكد من حذف هذا النشاط؟')) {
-        state.activities = state.activities.filter(activity => activity.id !== id);
-        saveData();
-        renderActivitiesForLeader();
-        updateStats();
-        showNotification('تم حذف النشاط بنجاح');
+        const success = await deleteActivityFromSupabase(id);
+        
+        if (success) {
+          state.activities = state.activities.filter(activity => activity.id !== id);
+          renderActivitiesForLeader();
+          updateStats();
+          showNotification('تم حذف النشاط بنجاح');
+        }
       }
     }
 
-    // الانضمام إلى النشاط
-    function joinActivity(link) {
-      // فتح المحاضرة داخل التطبيق في WebView
+    // ✅ الانضمام إلى النشاط
+    function joinActivity(link, roomType) {
+      if (roomType === 'closed') {
+        showNotification('الغرفة مغلقة، لا يمكن الانضمام حالياً', 'error');
+        return;
+      }
+      
       openMeetInApp(link);
     }
 
-    // فتح المحاضرة داخل التطبيق
+    // ✅ فتح المحاضرة داخل التطبيق
     function openMeetInApp(meetUrl) {
       meetFrame.src = meetUrl;
       meetWindow.classList.remove('hidden');
       
-      // إخفاء باقي المحتوى
       document.querySelector('main').style.display = 'none';
       document.querySelector('header').style.display = 'none';
       document.querySelector('footer').style.display = 'none';
     }
 
-    // إغلاق نافذة المحاضرة
+    // ✅ إغلاق نافذة المحاضرة
     function closeMeetWindow() {
       meetWindow.classList.add('hidden');
       meetFrame.src = '';
       
-      // إعادة إظهار المحتوى الرئيسي
       document.querySelector('main').style.display = 'block';
       document.querySelector('header').style.display = 'block';
       document.querySelector('footer').style.display = 'block';
     }
 
-    // تحديث الأنشطة
-    function refreshActivities() {
+    // ✅ تحديث الأنشطة
+    async function refreshActivities() {
+      await loadData();
       renderActivitiesForLeader();
       showNotification('تم تحديث قائمة الأنشطة');
     }
 
-    // الحصول على نص النوع
+    // ✅ الحصول على نص النوع
     function getTypeText(type) {
       const typeObj = activityTypes.find(t => t.id === type);
       return typeObj ? typeObj.name : type;
     }
 
-    // الحصول على كلاس النوع
-    function getTypeClass(type) {
-      const typeClasses = {
-        'project': 'type-project',
-        'meeting': 'type-meeting',
-        'workshop': 'type-workshop',
-        'training': 'type-training'
-      };
-      return typeClasses[type] || '';
-    }
-
-    // الحصول على نص نوع الغرفة
+    // ✅ الحصول على نص نوع الغرفة
     function getRoomTypeText(roomType) {
       const roomTypes = {
         'open': 'غرفة مفتوحة',
@@ -2782,19 +2999,22 @@
       return roomTypes[roomType] || roomType;
     }
 
-    // تنسيق التاريخ والوقت
+    // ✅ تنسيق التاريخ والوقت بالساعات والدقائق فقط
     function formatDateTime(dateTimeStr) {
       if (!dateTimeStr) return 'غير محدد';
       const date = new Date(dateTimeStr);
+      
+      // الحصول على التاريخ والوقت المحلي
       const day = String(date.getDate()).padStart(2, '0');
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const year = date.getFullYear();
       const hours = String(date.getHours()).padStart(2, '0');
       const minutes = String(date.getMinutes()).padStart(2, '0');
+      
       return `${day}/${month}/${year} ${hours}:${minutes}`;
     }
 
-    // تنسيق التاريخ فقط
+    // ✅ تنسيق التاريخ فقط
     function formatDate(dateTimeStr) {
       if (!dateTimeStr) return 'غير محدد';
       const date = new Date(dateTimeStr);
@@ -2804,7 +3024,7 @@
       return `${day}/${month}/${year}`;
     }
 
-    // تنسيق الوقت فقط
+    // ✅ تنسيق الوقت فقط بالساعات والدقائق
     function formatTime(dateTimeStr) {
       if (!dateTimeStr) return 'غير محدد';
       const date = new Date(dateTimeStr);
@@ -2813,7 +3033,7 @@
       return `${hours}:${minutes}`;
     }
 
-    // عرض الإشعارات
+    // ✅ عرض الإشعارات
     function showNotification(message, type = 'success') {
       notification.style.backgroundColor = type === 'success' ? 'var(--success)' : 'var(--accent)';
       notificationText.textContent = message;
@@ -2824,38 +3044,31 @@
       }, 3000);
     }
 
-    // تحويل الرابط إلى الشكل الصحيح
+    // ✅ تحويل الرابط إلى الشكل الصحيح
     function formatMeetLink(input) {
       let link = input.trim();
-      
-      // إزالة أي مسافات
       link = link.replace(/\s/g, '');
       
-      // إذا بدأ بـ meet.google.com مباشرة
       if (link.startsWith('meet.google.com/')) {
         return 'https://' + link;
       }
       
-      // إذا كان الرابط يحتوي فقط على الكود
       if (/^[a-z]{3}-[a-z]{4}-[a-z]{3}$/.test(link)) {
         return 'https://meet.google.com/' + link;
       }
       
-      // إذا كان الرابط يحتوي على https:// بالفعل
       if (link.startsWith('https://')) {
         return link;
       }
       
-      // إذا كان الرابط يحتوي على http:// نستبدله بـ https://
       if (link.startsWith('http://')) {
         return link.replace('http://', 'https://');
       }
       
-      // في جميع الحالات الأخرى نضيف https://
       return 'https://' + link;
     }
 
-    // التحقق من صحة الرابط
+    // ✅ التحقق من صحة الرابط
     function isValidUrl(url) {
       try {
         new URL(url);
@@ -2865,47 +3078,76 @@
       }
     }
 
-    // البحث والتصفية
+    // ✅ البحث والتصفية
     document.getElementById('searchInput').addEventListener('input', function() {
       renderActivitiesForPartners();
     });
 
-    // التهيئة الأولية
+    // ✅ التهيئة الأولية
     document.addEventListener('DOMContentLoaded', function() {
+      // تحميل البيانات عند بدء التشغيل
       loadData();
       
-      // إضافة بعض الأنشطة الافتراضية إذا لم تكن موجودة
-      if (state.activities.length === 0) {
-        state.activities = [
-          {
-            id: "1",
-            type: "project",
-            roomType: "open",
-            title: "عرض مشروع التسويق الرقمي",
-            description: "عرض شامل لمشروع التسويق الرقمي واستراتيجياته. سيتعلم المشاركون كيفية بناء استراتيجية تسويق رقمي فعالة، وإدارة الحملات الإعلانية، وتحليل النتائج لتحسين الأداء. هذا العرض مناسب للمبتدئين والمحترفين على حد سواء.",
-            startTime: new Date(Date.now() + 86400000).toISOString().slice(0, 16),
-            endTime: new Date(Date.now() + 90000000).toISOString().slice(0, 16),
-            link: "https://meet.google.com/kua-wxis-rro",
-            customMessage: "*N-Vision international* \n\n*لقاء لفريق الألماسة نادرة* 👌🏻\n\n_من مسجل جديد فأعلى_\n\n*ورشة الرؤية الذاتية وتطبيق مهارة SMART* 🌹🌹🌹\n\n💫💫💫💫💫💫💫\n\nمع 🗣️ السوبر مناجر \n\n*💎القائدة ريم الجبوري💎*\n\nفي شركتنا\n\n💎_*N-vision international*_\n\nبخبرة 3 سنوات في البيع المباشر 🤛🏻 .ساعدت الكثير في تحسين دخلهم وتطوير ذاتهم واليوم ستساعدك 👌🏻\n🔥🔥🔥🔥\n\n*24 أكتوبر 2025* \n\nعلى الساعة *20:30 مساءا* ⏱️🕰️\n\nماعليك سوى الضغط على الرابط التالي\n 👇🏻 👇🏻 👇🏻",
-            date: new Date().toLocaleDateString('ar-AR')
-          },
-          {
-            id: "2",
-            type: "workshop",
-            roomType: "closed",
-            title: "ورشة تحليل البيانات التسويقية",
-            description: "ورشة عملية لتحليل البيانات واستخلاص النتائج لتحسين الحملات التسويقية. سيتم تعليم المشاركين كيفية استخدام أدوات تحليل البيانات، وقراءة التقارير، واتخاذ القرارات بناءً على البيانات. تتضمن الورشة تمارين عملية وحالات دراسية حقيقية.",
-            startTime: new Date(Date.now() + 172800000).toISOString().slice(0, 16),
-            endTime: null, // بدون وقت انتهاء
-            link: "https://meet.google.com/abc-defg-hij",
-            customMessage: "",
-            date: new Date().toLocaleDateString('ar-AR')
-          }
-        ];
+      // تعيين وقت البدء الافتراضي (بعد ساعة من الآن)
+      const startTimeInput = document.getElementById('startTime');
+      if (startTimeInput) {
+        const now = new Date();
+        now.setHours(now.getHours() + 1);
+        now.setMinutes(0, 0, 0);
         
-        saveData();
-        updateStats();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        
+        startTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
       }
+      
+      // إضافة بعض الأنشطة الافتراضية إذا لم تكن موجودة
+      setTimeout(() => {
+        if (state.activities.length === 0) {
+          // إنشاء وقت في المستقبل (غدًا في نفس الوقت)
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setSeconds(0, 0);
+          
+          const endTime = new Date(tomorrow);
+          endTime.setHours(endTime.getHours() + 2);
+          
+          const defaultActivities = [
+            {
+              id: "1",
+              type: "project",
+              roomType: "open",
+              title: "عرض مشروع التسويق الرقمي",
+              description: "عرض شامل لمشروع التسويق الرقمي واستراتيجياته",
+              startTime: tomorrow.toISOString().slice(0, 16),
+              endTime: endTime.toISOString().slice(0, 16),
+              link: "https://meet.google.com/kua-wxis-rro",
+              customMessage: "*لقاء تدريبي*\n\nورشة تطوير المهارات\n\nمع المدرب المحترف",
+              date: new Date().toLocaleDateString('ar-AR'),
+              created_at: new Date().toISOString()
+            },
+            {
+              id: "2",
+              type: "training",
+              roomType: "closed",
+              title: "تدريب على مهارات الإلقاء",
+              description: "جلسة تدريبية مكثفة لتحسين مهارات الإلقاء والتقديم",
+              startTime: new Date(Date.now() + 86400000 * 2).toISOString().slice(0, 16),
+              endTime: new Date(Date.now() + 86400000 * 2 + 7200000).toISOString().slice(0, 16),
+              link: "https://meet.google.com/abc-defg-hij",
+              customMessage: "تدريب متقدم على مهارات الإلقاء والتقديم",
+              date: new Date().toLocaleDateString('ar-AR'),
+              created_at: new Date(Date.now() - 86400000).toISOString()
+            }
+          ];
+          
+          state.activities = defaultActivities;
+          updateStats();
+        }
+      }, 1000);
     });
   </script>
 </body>
