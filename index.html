@@ -531,7 +531,6 @@
       font-size: 0.8rem;
     }
     
-    /* أزرار الشريك - صفين أفقيين مضغوطين */
     .activity-actions {
       display: flex;
       flex-wrap: wrap;
@@ -722,44 +721,6 @@
       color: #ddd;
     }
     
-    .code-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      animation: fadeIn 0.3s ease;
-      backdrop-filter: blur(5px);
-    }
-    
-    .close-btn {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      background: var(--accent);
-      color: white;
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: bold;
-      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s;
-      font-size: 1rem;
-    }
-    
-    .close-btn:hover {
-      transform: rotate(90deg) scale(1.1);
-    }
-    
     .benefits-list {
       margin: 12px 0;
       padding-right: 15px;
@@ -793,7 +754,6 @@
       font-size: 0.9rem;
     }
     
-    /* تحسينات إضافية للأنشطة في قسم القائد */
     .content-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
@@ -853,7 +813,6 @@
       flex-wrap: wrap;
     }
     
-    /* أزرار القائد - صفين أفقيين مضغوطين */
     .content-actions {
       display: flex;
       flex-wrap: wrap;
@@ -875,7 +834,6 @@
       font-size: 0.8rem;
     }
     
-    /* نافذة تفاصيل النشاط */
     .activity-detail-modal {
       position: fixed;
       top: 0;
@@ -1056,7 +1014,6 @@
       color: white;
     }
     
-    /* الحالة في صفحة التفاصيل - تحت التطوير */
     .activity-detail-status {
       display: flex;
       align-items: center;
@@ -1118,7 +1075,6 @@
       font-size: 0.85rem;
     }
     
-    /* نافذة اختيار نوع النشاط */
     .activity-type-modal {
       position: fixed;
       top: 0;
@@ -1270,7 +1226,6 @@
       text-align: center;
     }
     
-    /* زر اختيار نوع النشاط */
     .activity-type-selector {
       display: flex;
       align-items: center;
@@ -1315,7 +1270,6 @@
       transform: translateX(-3px);
     }
     
-    /* نافذة تصفية نوع النشاط */
     .filter-activity-type-modal {
       position: fixed;
       top: 0;
@@ -1331,7 +1285,6 @@
       backdrop-filter: blur(10px);
     }
     
-    /* تنسيقات إضافية لزر نسخ الرابط */
     .btn-accent {
       background: var(--gradient-accent);
     }
@@ -1350,7 +1303,6 @@
       font-size: 0.85rem;
     }
     
-    /* مؤشر التحميل */
     .loading {
       display: inline-block;
       width: 20px;
@@ -1366,7 +1318,7 @@
       to { transform: rotate(360deg); }
     }
     
-    /* صفحة فقدان الاتصال - المحدثة */
+    /* صفحة فقدان الاتصال */
     .offline-page {
       position: fixed;
       top: 0;
@@ -1489,7 +1441,195 @@
       border: 1px solid rgba(255, 107, 107, 0.2);
     }
     
-    /* تحسينات إضافية للاستجابة على الأجهزة المحمولة */
+    /* ============================================
+       نافذة النسخ المنفصلة - بالشكل المطلوب (الإصلاح الجديد)
+       ============================================ */
+    
+    .copy-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(8px);
+      animation: fadeIn 0.3s ease;
+      padding: 20px;
+    }
+    
+    .copy-modal-container {
+      background: #2d2d2d;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 500px;
+      max-height: 85vh;
+      overflow: hidden;
+      box-shadow: 
+        0 20px 50px rgba(0, 0, 0, 0.5);
+      border: 1px solid #555;
+      animation: scaleIn 0.3s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .copy-modal-header {
+      background: #444;
+      padding: 20px 25px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #666;
+    }
+    
+    .copy-modal-header h3 {
+      color: white;
+      font-size: 1.4rem;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .close-copy-modal {
+      background: #666;
+      border: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: all 0.3s;
+    }
+    
+    .close-copy-modal:hover {
+      background: #777;
+      transform: rotate(90deg);
+    }
+    
+    .copy-modal-content {
+      padding: 25px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .copy-instruction {
+      color: #aaa;
+      font-size: 1rem;
+      margin-bottom: 25px;
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    .message-section,
+    .link-section {
+      margin-bottom: 25px;
+    }
+    
+    .section-label {
+      display: block;
+      color: white;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 1rem;
+      padding-right: 5px;
+    }
+    
+    .message-preview-box {
+      background: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 10px;
+      padding: 15px;
+      min-height: 120px;
+      max-height: 200px;
+      overflow-y: auto;
+      color: #ddd;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      direction: rtl;
+      text-align: right;
+    }
+    
+    .message-preview-box:empty::before {
+      content: "لا توجد رسالة مخصصة لهذا النشاط";
+      color: #888;
+      font-style: italic;
+    }
+    
+    .link-preview {
+      background: #1a1a1a;
+      border: 1px solid #555;
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: #4fc3f7;
+      font-size: 0.9rem;
+      word-break: break-all;
+      direction: ltr;
+      text-align: center;
+      font-family: monospace;
+    }
+    
+    .copy-buttons-container {
+      margin-top: auto;
+      padding-top: 20px;
+      border-top: 1px solid #444;
+    }
+    
+    .copy-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    
+    .copy-btn {
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+    }
+    
+    .copy-message-btn {
+      background: #6a0dad;
+      color: white;
+    }
+    
+    .copy-message-btn:hover {
+      background: #8a2be2;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .copy-link-btn {
+      background: #ff8c00;
+      color: white;
+    }
+    
+    .copy-link-btn:hover {
+      background: #ffa500;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* تحسينات للجوال */
     @media (max-width: 768px) {
       .container {
         padding: 12px;
@@ -1681,7 +1821,6 @@
         margin: 10px 0;
       }
       
-      /* في الشاشات الصغيرة، نعود لجعل الأزرار عمودية */
       .activity-actions {
         flex-direction: column;
       }
@@ -1700,7 +1839,6 @@
         margin: 4px 0;
       }
       
-      /* صفحة فقدان الاتصال على الجوال */
       .offline-icon {
         font-size: 4rem;
       }
@@ -1720,6 +1858,34 @@
       
       .offline-tip li {
         font-size: 1rem;
+      }
+      
+      /* نافذة النسخ على الجوال */
+      .copy-modal-container {
+        width: 95%;
+        max-height: 80vh;
+      }
+      
+      .copy-modal-header {
+        padding: 15px 20px;
+      }
+      
+      .copy-modal-header h3 {
+        font-size: 1.2rem;
+      }
+      
+      .copy-modal-content {
+        padding: 20px;
+      }
+      
+      .message-preview-box {
+        min-height: 100px;
+        font-size: 0.85rem;
+      }
+      
+      .copy-btn {
+        padding: 12px 15px;
+        font-size: 0.95rem;
       }
     }
 
@@ -1754,7 +1920,6 @@
         margin: 8px 0;
       }
       
-      /* صفحة فقدان الاتصال على الجوال الصغير */
       .offline-icon {
         font-size: 3rem;
       }
@@ -1775,6 +1940,22 @@
       .offline-tip li {
         font-size: 0.9rem;
         padding-right: 25px;
+      }
+      
+      /* نافذة النسخ على الجوال الصغير */
+      .copy-modal-container {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+      
+      .copy-modal-content {
+        padding: 15px;
+      }
+      
+      .copy-buttons {
+        margin-top: 20px;
       }
     }
     
@@ -1797,7 +1978,7 @@
   </style>
 </head>
 <body>
-  <!-- صفحة فقدان الاتصال - المحدثة -->
+  <!-- صفحة فقدان الاتصال -->
   <div class="offline-page hidden" id="offlinePage">
     <div class="offline-icon">❌</div>
     <h1 class="offline-title">تعذر الاتصال بالإنترنت</h1>
@@ -1821,6 +2002,47 @@
     
     <div class="connection-check" id="connectionStatus">
       ⏳ جاري التحقق من الاتصال...
+    </div>
+  </div>
+
+  <!-- نافذة نسخ الرسالة المخصصة - منفصلة -->
+  <div class="copy-modal-overlay hidden" id="copyModal">
+    <div class="copy-modal-container">
+      <div class="copy-modal-header">
+        <h3><i class="fas fa-copy"></i> نسخ</h3>
+        <button class="close-copy-modal" onclick="closeCopyModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="copy-modal-content">
+        <p class="copy-instruction">اختر ما تريد نسخه:</p>
+        
+        <div class="message-section">
+          <label class="section-label">الرسالة المخصصة:</label>
+          <div class="message-preview-box" id="copyMessagePreview">
+            <!-- سيتم تعبئته بالرسالة عبر JavaScript -->
+          </div>
+        </div>
+        
+        <div class="link-section">
+          <label class="section-label">رابط النشاط:</label>
+          <div class="link-preview" id="copyLinkPreview">
+            <!-- سيتم تعبئته بالرابط عبر JavaScript -->
+          </div>
+        </div>
+        
+        <div class="copy-buttons-container">
+          <div class="copy-buttons">
+            <button class="copy-btn copy-message-btn" onclick="copyMessageContent()">
+              <i class="fas fa-copy"></i> نسخ الرسالة
+            </button>
+            <button class="copy-btn copy-link-btn" onclick="copyLinkOnly()">
+              <i class="fas fa-link"></i> نسخ الرابط فقط
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -2217,7 +2439,7 @@
     const offlinePage = document.getElementById('offlinePage');
     const connectionStatus = document.getElementById('connectionStatus');
     
-    // ✅ عناصر نافذة تفاصيل النشاط
+    // ✅ عناصر نافذة التفاصيل
     const activityDetailModal = document.getElementById('activityDetailModal');
     const detailActivityTitle = document.getElementById('detailActivityTitle');
     const detailActivityDescription = document.getElementById('detailActivityDescription');
@@ -2239,6 +2461,11 @@
     const filterActivityTypesGrid = document.getElementById('filterActivityTypesGrid');
     const selectedFilterTypeText = document.getElementById('selectedFilterTypeText');
     const filterSelectInput = document.getElementById('filterSelect');
+    
+    // ✅ عناصر نافذة النسخ الجديدة
+    const copyModal = document.getElementById('copyModal');
+    const copyMessagePreview = document.getElementById('copyMessagePreview');
+    const copyLinkPreview = document.getElementById('copyLinkPreview');
 
     // ✅ أنواع الأنشطة
     const activityTypes = [
@@ -2272,22 +2499,17 @@
       }
     ];
 
-    // ✅ 1. نظام مراقبة الاتصال المحسن
+    // ✅ 1. نظام مراقبة الاتصال
     function initConnectionMonitoring() {
       console.log('بدء مراقبة حالة الاتصال...');
       
-      // تحديث حالة الاتصال الحالية
       state.isOnline = navigator.onLine;
       updateConnectionStatus();
       
-      // مراقبة تغييرات حالة الاتصال
       window.addEventListener('online', handleConnectionChange);
       window.addEventListener('offline', handleConnectionChange);
       
-      // بدء فحص دوري للاتصال
       state.connectionCheckInterval = setInterval(checkConnection, 3000);
-      
-      // التحقق المبدئي
       checkConnection();
     }
     
@@ -2335,16 +2557,13 @@
       console.log('عرض صفحة فقدان الاتصال');
       offlinePage.classList.remove('hidden');
       
-      // إخفاء المحتوى الرئيسي
       document.querySelector('header').style.display = 'none';
       document.querySelector('.container').style.display = 'none';
       document.querySelector('footer').style.display = 'none';
       
-      // إخفاء جميع النوافذ المفتوحة
       hideAllModals();
       closeMeetWindow();
       
-      // بدء محاولات إعادة الاتصال
       startReconnectionAttempts();
     }
     
@@ -2352,18 +2571,13 @@
       console.log('إخفاء صفحة فقدان الاتصال');
       offlinePage.classList.add('hidden');
       
-      // إعادة عرض المحتوى الرئيسي
       document.querySelector('header').style.display = 'block';
       document.querySelector('.container').style.display = 'block';
       document.querySelector('footer').style.display = 'block';
       
-      // إيقاف محاولات إعادة الاتصال
       stopReconnectionAttempts();
       
-      // العودة إلى الصفحة الرئيسية تلقائيًا
       showMain();
-      
-      // إعادة تحميل البيانات
       loadData();
       
       showNotification('تم استعادة الاتصال بالإنترنت بنجاح', 'success');
@@ -2392,7 +2606,6 @@
           }
           clearInterval(state.reconnectInterval);
           
-          // إعادة تشغيل المحاولات بعد فترة
           setTimeout(() => {
             startReconnectionAttempts();
           }, 10000);
@@ -2409,27 +2622,23 @@
     }
     
     function hideAllModals() {
-      // إغلاق جميع النوافذ المنبثقة
-      document.querySelectorAll('.code-modal').forEach(modal => modal.remove());
       activityDetailModal.classList.add('hidden');
       activityTypeModal.classList.add('hidden');
       filterActivityTypeModal.classList.add('hidden');
+      copyModal.classList.add('hidden');
     }
 
     // ✅ 2. دالة للتواصل مع Supabase
     async function supabaseFetch(endpoint, method = 'GET', data = null) {
-      // التحقق من الاتصال أولاً
       if (!state.isOnline) {
         throw new Error('لا يوجد اتصال بالإنترنت');
       }
       
-      // إلغاء أي طلب سابق إذا كان هناك
       if (state.timeoutId) {
         clearTimeout(state.timeoutId);
       }
       
       return new Promise((resolve, reject) => {
-        // مهلة 3 ثواني
         const timeoutPromise = new Promise((_, rejectTimeout) => {
           state.timeoutId = setTimeout(() => {
             rejectTimeout(new Error('انتهت مهلة الاتصال'));
@@ -2465,14 +2674,12 @@
           } catch (error) {
             console.error('خطأ في supabaseFetch:', error);
             
-            // إذا كان الخطأ متعلقًا بالاتصال، تحديث الحالة
             if (error.message.includes('انتهت مهلة الاتصال') || 
                 error.message.includes('Failed to fetch') ||
                 error.name === 'AbortError' ||
                 error.message.includes('Network request failed')) {
               
               if (state.isOnline) {
-                // الاتصال كان نشطًا ولكن الطلب فشل
                 if (!offlinePage.classList.contains('hidden')) {
                   showOfflinePage();
                 }
@@ -2483,11 +2690,9 @@
           }
         })();
         
-        // التنافس بين الوعود
         Promise.race([fetchPromise, timeoutPromise])
           .then(resolve)
           .catch(error => {
-            // في حالة الفشل، نستخدم البيانات المحلية
             console.warn('فشل الاتصال بالسيرفر، استخدام البيانات المحلية:', error.message);
             resolve(null);
           });
@@ -2496,7 +2701,6 @@
 
     // ✅ 3. تحميل البيانات من Supabase
     async function loadData() {
-      // التحقق من الاتصال أولاً
       if (!state.isOnline) {
         console.log('لا يوجد اتصال بالإنترنت، استخدام البيانات المحلية');
         useLocalData();
@@ -2506,19 +2710,16 @@
       try {
         state.isLoading = true;
         
-        // عرض مؤشر تحميل بسيط
         if (refreshBtn) {
           const originalHTML = refreshBtn.innerHTML;
           refreshBtn.innerHTML = '<span class="loading"></span> جاري التحميل...';
           refreshBtn.disabled = true;
         }
         
-        // تحديث فوري من البيانات المحلية أولاً
         updateStats();
         renderActivitiesForLeader();
         renderActivitiesForPartners();
         
-        // محاولة التحميل من السيرفر في الخلفية
         const data = await supabaseFetch('activities?select=*&order=created_at.desc');
         
         if (data && data.length > 0) {
@@ -2536,10 +2737,8 @@
             created_at: item.created_at
           }));
           
-          // حفظ نسخة احتياطية محلية
           saveLocalBackup();
           
-          // تحديث واجهة المستخدم فوراً
           updateStats();
           renderActivitiesForLeader();
           renderActivitiesForPartners();
@@ -2552,7 +2751,6 @@
       } finally {
         state.isLoading = false;
         
-        // إعادة زر التحديث إلى وضعه الطبيعي
         if (refreshBtn) {
           refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> تحديث';
           refreshBtn.disabled = false;
@@ -2578,7 +2776,6 @@
     // ✅ 4. إضافة نشاط جديد إلى Supabase
     async function addActivityToSupabase(activity) {
       return new Promise((resolve) => {
-        // التحقق من الاتصال أولاً
         if (!state.isOnline) {
           showNotification('لا يوجد اتصال بالإنترنت، سيتم حفظ النشاط محلياً', 'warning');
           addActivityLocally(activity);
@@ -2586,7 +2783,6 @@
           return;
         }
         
-        // تحديث واجهة المستخدم فوراً
         const tempId = Date.now().toString();
         const tempActivity = {
           ...activity,
@@ -2595,14 +2791,12 @@
           created_at: new Date().toISOString()
         };
         
-        // إضافة مؤقتة للبيانات
         state.activities.unshift(tempActivity);
         updateStats();
         renderActivitiesForLeader();
         
         showNotification('جاري إضافة النشاط...', 'success');
         
-        // محاولة الحفظ في الخلفية
         supabaseFetch('activities', 'POST', {
           type: activity.type,
           room_type: activity.roomType,
@@ -2614,7 +2808,6 @@
           custom_message: activity.customMessage
         }).then(data => {
           if (data && data.length > 0) {
-            // تحديث الـ ID الحقيقي
             const savedActivity = data[0];
             const index = state.activities.findIndex(a => a.id === tempId);
             if (index !== -1) {
@@ -2632,10 +2825,7 @@
                 created_at: savedActivity.created_at
               };
               
-              // حفظ نسخة احتياطية محلية
               saveLocalBackup();
-              
-              // تحديث العرض
               renderActivitiesForLeader();
               updateStats();
             }
@@ -2671,7 +2861,6 @@
     // ✅ 5. تحديث نشاط في Supabase
     async function updateActivityInSupabase(activityId, updates) {
       return new Promise((resolve) => {
-        // التحقق من الاتصال أولاً
         if (!state.isOnline) {
           showNotification('لا يوجد اتصال، سيتم التحديث محلياً', 'warning');
           updateActivityLocally(activityId, updates);
@@ -2679,20 +2868,16 @@
           return;
         }
         
-        // تحديث فوري محلياً
         const activityIndex = state.activities.findIndex(a => a.id === activityId);
         if (activityIndex !== -1) {
           state.activities[activityIndex].roomType = updates.roomType;
           
-          // تحديث واجهة المستخدم فوراً
           renderActivitiesForLeader();
           renderActivitiesForPartners();
           
-          // حفظ نسخة احتياطية محلية
           saveLocalBackup();
         }
         
-        // محاولة التحديث في الخلفية
         supabaseFetch(`activities?id=eq.${activityId}`, 'PATCH', {
           room_type: updates.roomType
         }).then(() => {
@@ -2719,7 +2904,6 @@
     // ✅ 6. حذف نشاط من Supabase
     async function deleteActivityFromSupabase(activityId) {
       return new Promise((resolve) => {
-        // التحقق من الاتصال أولاً
         if (!state.isOnline) {
           showNotification('لا يوجد اتصال، سيتم الحذف محلياً', 'warning');
           deleteActivityLocally(activityId);
@@ -2727,7 +2911,6 @@
           return;
         }
         
-        // حذف فوري محلياً
         const activityIndex = state.activities.findIndex(a => a.id === activityId);
         let deletedActivity = null;
         
@@ -2735,18 +2918,15 @@
           deletedActivity = state.activities[activityIndex];
           state.activities.splice(activityIndex, 1);
           
-          // تحديث واجهة المستخدم فوراً
           updateStats();
           renderActivitiesForLeader();
           renderActivitiesForPartners();
           
-          // حفظ نسخة احتياطية محلية
           saveLocalBackup();
         }
         
         showNotification('جاري حذف النشاط...', 'success');
         
-        // محاولة الحذف في الخلفية
         supabaseFetch(`activities?id=eq.${activityId}`, 'DELETE')
           .then(() => {
             showNotification('تم حذف النشاط بنجاح', 'success');
@@ -2787,11 +2967,9 @@
         return;
       }
       
-      // تحويل وقت البدء إلى كائن Date
       const startDateTime = new Date(startTimeInput);
       startDateTime.setSeconds(0, 0);
       
-      // التحقق من أن وقت البدء ليس في الماضي
       const currentTime = new Date();
       currentTime.setSeconds(0, 0);
       
@@ -2800,7 +2978,6 @@
         return;
       }
       
-      // معالجة وقت الانتهاء إذا كان موجوداً
       let endDateTime = null;
       if (endTimeInput) {
         endDateTime = new Date(endTimeInput);
@@ -2819,7 +2996,6 @@
         return;
       }
       
-      // إعداد بيانات النشاط
       const activity = {
         type: type,
         roomType: roomType,
@@ -2831,7 +3007,6 @@
         customMessage: customMessage
       };
       
-      // إضافة النشاط
       if (addActivityBtn) {
         const originalHTML = addActivityBtn.innerHTML;
         addActivityBtn.innerHTML = '<span class="loading"></span> جاري الإضافة...';
@@ -2979,7 +3154,6 @@
         const activityElement = document.createElement('div');
         activityElement.className = 'activity-card';
         
-        // تحديد ما إذا كان يمكن الانضمام للنشاط
         const canJoin = activity.roomType === 'open';
         
         activityElement.innerHTML = `
@@ -3029,7 +3203,6 @@
         
         state.currentActivityLink = activity.link;
         
-        // تحديث زر الانضمام بناءً على حالة الغرفة
         const canJoin = activity.roomType === 'open';
         if (canJoin) {
           detailJoinButton.className = 'btn';
@@ -3108,7 +3281,6 @@
                                          type === 'warning' ? 'var(--warning)' : 'var(--primary)';
       notificationText.textContent = message;
       
-      // إضافة أيقونة حسب النوع
       const icon = notification.querySelector('i');
       icon.className = type === 'success' ? 'fas fa-check-circle' :
                       type === 'error' ? 'fas fa-exclamation-circle' :
@@ -3169,6 +3341,147 @@
       workshopsCount.textContent = workshops;
       trainingsCount.textContent = trainings;
       totalActivitiesElement.textContent = total;
+    }
+
+    // ✅ نافذة النسخ الجديدة - الإصلاح
+    function showCopyModalForPartner(activityId) {
+      const activity = state.activities.find(a => a.id === activityId);
+      if (!activity) return;
+      
+      if (copyMessagePreview) {
+        copyMessagePreview.textContent = activity.customMessage || '';
+      }
+      
+      if (copyLinkPreview) {
+        copyLinkPreview.textContent = activity.link;
+      }
+      
+      window.currentCopyActivityId = activityId;
+      window.currentCopyActivityLink = activity.link;
+      window.currentCopyActivityMessage = activity.customMessage || '';
+      
+      copyModal.classList.remove('hidden');
+      
+      // ✅ إصلاح: تأكد من أن الأزرار تظهر دائمًا
+      setTimeout(() => {
+        const container = document.querySelector('.copy-modal-container');
+        const content = document.querySelector('.copy-modal-content');
+        const buttons = document.querySelector('.copy-buttons-container');
+        
+        if (container && content && buttons) {
+          // إعادة حساب الأبعاد لضمان ظهور الأزرار
+          container.style.display = 'flex';
+          container.style.flexDirection = 'column';
+          content.style.flex = '1';
+          content.style.overflowY = 'auto';
+          buttons.style.marginTop = 'auto';
+          buttons.style.flexShrink = '0';
+        }
+      }, 10);
+    }
+
+    function showCopyModal(activityId) {
+      const activity = state.activities.find(a => a.id === activityId);
+      if (!activity) return;
+      
+      if (copyMessagePreview) {
+        copyMessagePreview.textContent = activity.customMessage || '';
+      }
+      
+      if (copyLinkPreview) {
+        copyLinkPreview.textContent = activity.link;
+      }
+      
+      window.currentCopyActivityId = activityId;
+      window.currentCopyActivityLink = activity.link;
+      window.currentCopyActivityMessage = activity.customMessage || '';
+      
+      copyModal.classList.remove('hidden');
+      
+      // ✅ إصلاح: تأكد من أن الأزرار تظهر دائمًا
+      setTimeout(() => {
+        const container = document.querySelector('.copy-modal-container');
+        const content = document.querySelector('.copy-modal-content');
+        const buttons = document.querySelector('.copy-buttons-container');
+        
+        if (container && content && buttons) {
+          // إعادة حساب الأبعاد لضمان ظهور الأزرار
+          container.style.display = 'flex';
+          container.style.flexDirection = 'column';
+          content.style.flex = '1';
+          content.style.overflowY = 'auto';
+          buttons.style.marginTop = 'auto';
+          buttons.style.flexShrink = '0';
+        }
+      }, 10);
+    }
+
+    function closeCopyModal() {
+      copyModal.classList.add('hidden');
+      window.currentCopyActivityId = null;
+      window.currentCopyActivityLink = null;
+      window.currentCopyActivityMessage = null;
+    }
+
+    function copyMessageContent() {
+      const message = window.currentCopyActivityMessage;
+      
+      if (!message || message.trim() === '') {
+        showNotification('لا توجد رسالة مخصصة لهذا النشاط', 'warning');
+        return;
+      }
+      
+      copyToClipboard(message, 'الرسالة المخصصة');
+    }
+
+    function copyLinkOnly() {
+      const link = window.currentCopyActivityLink;
+      
+      if (!link) {
+        showNotification('لا يوجد رابط للنشاط', 'error');
+        return;
+      }
+      
+      copyToClipboard(link, 'رابط النشاط');
+    }
+
+    function copyToClipboard(text, title = "المحتوى") {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+          showNotification(`تم نسخ ${title} بنجاح`, 'success');
+        }).catch(err => {
+          fallbackCopyTextToClipboard(text, title);
+        });
+      } else {
+        fallbackCopyTextToClipboard(text, title);
+      }
+    }
+
+    function fallbackCopyTextToClipboard(text, title = "") {
+      const textArea = document.createElement("textarea");
+      textArea.value = text;
+      
+      textArea.style.top = "0";
+      textArea.style.left = "0";
+      textArea.style.position = "fixed";
+      textArea.style.opacity = "0";
+      
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      
+      try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+          showNotification(`تم نسخ ${title ? title : 'المحتوى'} بنجاح`, 'success');
+        } else {
+          showNotification('فشل نسخ المحتوى، يرجى المحاولة مرة أخرى', 'error');
+        }
+      } catch (err) {
+        showNotification('فشل نسخ المحتوى، يرجى المحاولة مرة أخرى', 'error');
+      }
+      
+      document.body.removeChild(textArea);
     }
 
     // ✅ بقية الدوال الأساسية
@@ -3262,7 +3575,6 @@
     function showFilterActivityTypeModal() {
       filterActivityTypesGrid.innerHTML = '';
       
-      // خيار "جميع الأنشطة"
       const allElement = document.createElement('div');
       allElement.className = `activity-type-item ${state.selectedFilterType === 'all' ? 'selected' : ''}`;
       allElement.setAttribute('data-type', 'all');
@@ -3278,7 +3590,6 @@
       
       filterActivityTypesGrid.appendChild(allElement);
       
-      // أنواع الأنشطة
       activityTypes.forEach(type => {
         const typeElement = document.createElement('div');
         typeElement.className = `activity-type-item ${state.selectedFilterType === type.id ? 'selected' : ''}`;
@@ -3325,141 +3636,6 @@
         closeFilterActivityTypeModal();
         renderActivitiesForPartners();
       }
-    }
-
-    function showCopyModalForPartner(activityId) {
-      const activity = state.activities.find(a => a.id === activityId);
-      if (!activity) return;
-      
-      const modal = document.createElement('div');
-      modal.className = 'code-modal';
-      modal.innerHTML = `
-        <div class="code-box" style="max-width: 700px;">
-          <div class="close-btn" onclick="this.parentElement.parentElement.remove()">×</div>
-          <h3><i class="fas fa-copy"></i> نسخ</h3>
-          <p>اختر ما تريد نسخه:</p>
-          
-          <div class="form-group">
-            <label>الرسالة المخصصة:</label>
-            <div class="message-preview">
-              ${activity.customMessage || 'لا توجد رسالة مخصصة لهذا النشاط'}
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>رابط النشاط:</label>
-            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-top: 8px; word-break: break-all; font-size: 0.9rem;">
-              ${activity.link}
-            </div>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-            <button class="btn" onclick="copyMessage('${activity.id}'); this.parentElement.parentElement.parentElement.remove();">
-              <i class="fas fa-copy"></i> نسخ الرسالة
-            </button>
-            <button class="btn btn-outline" onclick="copyLink('${activity.link}', '${activity.title}'); this.parentElement.parentElement.parentElement.remove();">
-              <i class="fas fa-link"></i> نسخ الرابط فقط
-            </button>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(modal);
-    }
-
-    function showCopyModal(activityId) {
-      const activity = state.activities.find(a => a.id === activityId);
-      if (!activity) return;
-      
-      const modal = document.createElement('div');
-      modal.className = 'code-modal';
-      modal.innerHTML = `
-        <div class="code-box" style="max-width: 700px;">
-          <div class="close-btn" onclick="this.parentElement.parentElement.remove()">×</div>
-          <h3><i class="fas fa-copy"></i> نسخ</h3>
-          <p>اختر ما تريد نسخه:</p>
-          
-          <div class="form-group">
-            <label>الرسالة المخصصة:</label>
-            <div class="message-preview">
-              ${activity.customMessage || 'لا توجد رسالة مخصصة لهذا النشاط'}
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label>رابط النشاط:</label>
-            <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; margin-top: 8px; word-break: break-all; font-size: 0.9rem;">
-              ${activity.link}
-            </div>
-          </div>
-          
-          <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 20px;">
-            <button class="btn" onclick="copyMessage('${activity.id}'); this.parentElement.parentElement.parentElement.remove();">
-              <i class="fas fa-copy"></i> نسخ الرسالة
-            </button>
-            <button class="btn btn-outline" onclick="copyLink('${activity.link}', '${activity.title}'); this.parentElement.parentElement.parentElement.remove();">
-              <i class="fas fa-link"></i> نسخ الرابط فقط
-            </button>
-          </div>
-        </div>
-      `;
-      
-      document.body.appendChild(modal);
-    }
-
-    function copyMessage(activityId) {
-      const activity = state.activities.find(a => a.id === activityId);
-      if (!activity) return;
-      
-      let textToCopy = activity.customMessage || '';
-      
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(textToCopy).then(() => {
-          showNotification('تم نسخ الرسالة بنجاح', 'success');
-        }).catch(err => {
-          fallbackCopyTextToClipboard(textToCopy, 'الرسالة');
-        });
-      } else {
-        fallbackCopyTextToClipboard(textToCopy, 'الرسالة');
-      }
-    }
-
-    function copyLink(link, title = "") {
-      if (navigator.clipboard && window.isSecureContext) {
-        navigator.clipboard.writeText(link).then(() => {
-          showNotification(`تم نسخ رابط النشاط ${title ? `"${title}"` : ''}`, 'success');
-        }).catch(err => {
-          fallbackCopyTextToClipboard(link, title);
-        });
-      } else {
-        fallbackCopyTextToClipboard(link, title);
-      }
-    }
-
-    function fallbackCopyTextToClipboard(text, title = "") {
-      const textArea = document.createElement("textarea");
-      textArea.value = text;
-      
-      textArea.style.top = "0";
-      textArea.style.left = "0";
-      textArea.style.position = "fixed";
-      
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-      
-      try {
-        const successful = document.execCommand('copy');
-        if (successful) {
-          showNotification(`تم نسخ ${title ? title : 'المحتوى'} بنجاح`, 'success');
-        } else {
-          showNotification('فشل نسخ المحتوى، يرجى المحاولة مرة أخرى', 'error');
-        }
-      } catch (err) {
-        showNotification('فشل نسخ المحتوى، يرجى المحاولة مرة أخرى', 'error');
-      }
-      
-      document.body.removeChild(textArea);
     }
 
     function closeActivityDetail() {
@@ -3530,17 +3706,27 @@
       renderActivitiesForPartners();
     });
 
+    // ✅ إغلاق نافذة النسخ بالزر ESC
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeCopyModal();
+      }
+    });
+
+    // ✅ إغلاق نافذة النسخ بالنقر خارجها
+    copyModal?.addEventListener('click', function(event) {
+      if (event.target === this) {
+        closeCopyModal();
+      }
+    });
+
     // ✅ التهيئة الأولية
     document.addEventListener('DOMContentLoaded', function() {
       console.log('بدء تشغيل التطبيق...');
       
-      // بدء مراقبة حالة الاتصال
       initConnectionMonitoring();
-      
-      // تحميل البيانات عند بدء التشغيل
       loadData();
       
-      // تعيين وقت البدء الافتراضي (بعد ساعة من الآن)
       const startTimeInput = document.getElementById('startTime');
       if (startTimeInput) {
         const now = new Date();
@@ -3556,7 +3742,6 @@
         startTimeInput.value = `${year}-${month}-${day}T${hours}:${minutes}`;
       }
       
-      // التحقق المبدئي من الاتصال
       if (!state.isOnline) {
         console.log('لا يوجد اتصال بالإنترنت عند بدء التشغيل');
         showOfflinePage();
