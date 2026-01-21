@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
-Sitemap: https://axora.app/sitemap.xml
+
+Sitemap: https://djams200.github.io/axora.app/sitemap.xml
