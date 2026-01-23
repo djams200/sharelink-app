@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /private/
+Disallow: /admin/
 
 Sitemap: https://djams200.github.io/axora.app/sitemap.xml
